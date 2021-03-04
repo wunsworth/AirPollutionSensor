@@ -1,4 +1,5 @@
 import json
+from datetime import *
 import numpy as np
 import pandas as pd
 
@@ -21,31 +22,32 @@ class Sensor:
 
     def as_JSON(self):
         d = {
-        'id': self.id
+        'ID': self.ID,
         'latitude': self.latitude,
         'longitude': self.longitude,
-        'road_distance': self.dist_from_road,
         'readings': self.readings,
         'calibrations': self.calibrations}
 
         return json.dumps(d, indent = 4)
 
 class mobileSensor(Sensor):
-    def __init__(self, ID, latitude, longitude, calib_time):
+    def __init__(self, ID, latitude, longitude, calib_time = None):
         super().__init__(ID, latitude, longitude)
         self.calib_time = calib_time
         
 class lowSensor(Sensor):
-    def __init__(self, id, lat, long, calib_time):
-        super().__init__()
+    def __init__(self, ID, latitude, longitude, calib_time = None):
+        super().__init__(ID, latitude, longitude)
         self.calib_time = calib_time
 
 class Network:
     def __init__(self):
         self.sensors = dict()
     
-    def add_sensor(self, sensor: Sensor):
-        self.sensor_list[sensor.id] = sensor
+    def add_sensors(self, sensors):
+        sensors = list(sensors)
+        for sensor in sensors:
+            self.sensor_list[sensor.ID] = sensor
 
     def ids(self):
         return [sensor.ID for sensor in self.sensors()]
@@ -55,7 +57,7 @@ class Network:
         for sensor in self.sensors:
             for datetime, reading in sensor.readings.items():
                 if datetime >= since:
-                    readings[(sensor.id, datetime)] = reading
+                    readings[(sensor.ID, datetime)] = reading
         readings_sorted = dict(sorted(readings.items(), key = lambda reading: reading[0][1]))
         return readings_sorted
 
@@ -64,6 +66,6 @@ class Network:
         for sensor in self.sensors:
             for datetime, calibration in sensor.calibrations.items():
                 if datetime >= since:
-                    readings[(sensor.id, datetime)] = calibration
+                    readings[(sensor.ID, datetime)] = calibration
         calibrations_sorted = dict(sorted(calibrations.items(), key = lambda calib: calib[0][1]))
         return calibrations_sorted
