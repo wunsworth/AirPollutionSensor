@@ -27,7 +27,9 @@ class Sensor:
         return self.as_JSON()
 
     def data(self, network):
-        return network.data[network.data['channel_id'] == self.ID]
+        sensordata = network.data[network.data['channel_id'] == self.ID].sort_values('created_at')
+        sensordata.index = range(len(sensordata))
+        return sensordata
 
     def as_JSON(self):
         d = {
@@ -87,3 +89,6 @@ class Network:
                 self.sensors[ID] = Sensor(ID, 'static', sensor_data['latitude'].mean(), sensor_data['longitude'].mean())
             else:
                 self.sensors[ID] = Sensor(ID, 'mobile', None, None)
+
+    def sensor_data(self, channel_id):
+        return self.sensors[channel_id].data(self)
